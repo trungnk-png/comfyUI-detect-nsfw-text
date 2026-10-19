@@ -1,0 +1,10 @@
+[project]
+name = "comfyui-detect-nsfw-text"
+version = "1.0.0"
+description = "ComfyUI node that blocks NSFW text with the Qwen prompt guard"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+
+[tool.comfy]
+DisplayName = "Detect NSFW Text"
+Icon = ""

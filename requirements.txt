@@ -1,0 +1,2 @@
+# No extra packages. ComfyUI already provides torch.
+# The node loads qwen3vl_8b_int8_convrot.safetensors from models/text_encoders or models/clip.
