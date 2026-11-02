@@ -82,12 +82,18 @@ def _load_clip(clip_name):
         raise FileNotFoundError(f"Qwen NSFW Guard: text encoder not found: {clip_name}")
     with _load_lock:
         if _cached_clip is None or _cached_path != path:
-            loaded = comfy.sd.load_clip(ckpt_paths=[path])
+            device = comfy.model_management.get_torch_device()
+            model_options = {
+                "load_device": device,
+                "offload_device": device,
+                "initial_device": device,
+            }
+            loaded = comfy.sd.load_clip(ckpt_paths=[path], model_options=model_options)
             _cached_clip, _cached_path = loaded, path
         return _cached_clip
 
 
-def _check(clip, query, source, allow_non_english=False):
+def _check(clip, query, source, prompt="", allow_non_english=False):
     tokens = clip.tokenize(query)
     generated = clip.generate(tokens, do_sample=False, max_length=32, temperature=0.0)
     response = clip.tokenizer.decode(generated).strip()
@@ -104,7 +110,22 @@ def _check(clip, query, source, allow_non_english=False):
         raise UnsupportedLanguageError("language not supported, only support english at this time")
     if any(verdict.upper() == "NSFW" for verdict in verdicts):
         comfy.model_management.interrupt_current_processing(True)
-        raise NSFWDetectedError(f"Qwen NSFW Guard blocked {source}: {response}")
+        reason = "NSFW content detected"
+        match_reason = re.search(r"^\s*REASON:\s*(.+)$", response, re.MULTILINE | re.IGNORECASE)
+        if match_reason:
+            reason = match_reason.group(1).strip()
+        error_payload = {
+            "error": {
+                "type": "nsfw_content_detected",
+                "message": f"NSFW prompt: {prompt} | Reason: {reason}",
+                "details": {
+                    "type": "text",
+                    "prompt": prompt,
+                    "reason": reason,
+                },
+            }
+        }
+        raise NSFWDetectedError(json.dumps(error_payload, ensure_ascii=False))
     if allow_non_english and any(
         re.match(r"^(NOT[ _]ENGLISH|UNSUPPORTED[ _]LANGUAGE)$", v, re.IGNORECASE)
         for v in verdicts
@@ -126,6 +147,7 @@ def _moderate_prompt(clip_name, clip=None, prompt=None, language_filter="all_lan
             clip,
             policy + "\nClassify this prompt (JSON string):\n" + json.dumps(prompt, ensure_ascii=False),
             "prompt",
+            prompt=str(prompt),
             allow_non_english=not english_only,
         )
     ]
@@ -133,7 +155,7 @@ def _moderate_prompt(clip_name, clip=None, prompt=None, language_filter="all_lan
 
 
 def _log_error(exc):
-    print(f"[Detect NSFW Text] {exc}", flush=True)
+    pass
 
 
 class DetectNSFWText:
