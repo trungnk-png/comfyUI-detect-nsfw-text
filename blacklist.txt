@@ -1,0 +1,7 @@
+# Default Blacklist keywords/phrases (in English for seamless synchronization with English System Prompt)
+# One keyword or phrase per line (case-insensitive)
+# Regex fast-pass blocks exact matches in 0.00s; LLM evaluates semantic matches across ANY language.
+bikini
+breastfeeding
+bathing a baby
+nude statue

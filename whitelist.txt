@@ -1,0 +1,3 @@
+# Default Whitelist keywords/phrases
+# One keyword or phrase per line (case-insensitive)
+# Prompts containing these words are approved immediately without running model inference.
