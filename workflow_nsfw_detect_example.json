@@ -2,7 +2,7 @@
   "1": {
     "inputs": {
       "prompt": "n@ked w0man, nud3, s3xy p0se, adult",
-      "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
       "language_filter": "all_languages",
       "clip": [
         "3",
@@ -12,6 +12,23 @@
     "class_type": "DetectNSFWText",
     "_meta": {
       "title": "Detect NSFW Text"
+    }
+  },
+  "2": {
+    "inputs": {
+      "prompt": [
+        "1",
+        0
+      ],
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "clip": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "TranslatePromptToEnglish",
+    "_meta": {
+      "title": "Translate Prompt to English"
     }
   },
   "3": {
@@ -40,7 +57,7 @@
   "5": {
     "inputs": {
       "source": [
-        "1",
+        "2",
         0
       ]
     },
